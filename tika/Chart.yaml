@@ -4,7 +4,7 @@ description: >-
   A Helm chart for Apache Tika Server — a content analysis toolkit that detects
   and extracts metadata and text from over a thousand different file types.
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "3.2.3.0"
 home: https://github.com/kenchrcum/helm-chart-tika
 sources:
