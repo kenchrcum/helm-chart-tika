@@ -509,8 +509,8 @@ publish releases to GitHub Pages.
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `helm-lint-test.yml` | PR / push to `main` touching `tika/**` | Lint + template all CI values files |
-| `helm-release.yml` | Push to `main` touching `tika/**` | Package + publish to GitHub Pages |
+| `helm-lint-test.yml` | PR / push to `master` touching `tika/**` | Lint + template all CI values files |
+| `helm-release.yml` | Push to `master` touching `tika/**` | Package + publish to GitHub Pages |
 | `setup-pages.yml` | Manual (`workflow_dispatch`) | One-time: create `gh-pages` branch |
 
 ### Local Testing

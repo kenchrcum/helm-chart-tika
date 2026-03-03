@@ -404,7 +404,7 @@ helm-charts/
 │   ├── cr.yaml                     # chart-releaser config
 │   └── workflows/
 │       ├── helm-lint-test.yml      # PR: lint + template + unittest
-│       ├── helm-release.yml        # Push to main: package + release via chart-releaser
+│       ├── helm-release.yml        # Push to master: package + release via chart-releaser
 │       └── setup-pages.yml         # One-time: create gh-pages branch
 ├── charts/
 │   └── tika/                       # The actual chart
@@ -983,7 +983,7 @@ helm-charts/
 │   ├── cr.yaml                    # chart-releaser config
 │   └── workflows/
 │       ├── helm-lint-test.yml     # PR: lint + template + unittest
-│       ├── helm-release.yml       # Push to main: package + release via chart-releaser
+│       ├── helm-release.yml       # Push to master: package + release via chart-releaser
 │       └── setup-pages.yml        # One-time: create gh-pages branch
 ├── charts/
 │   └── tika/                      # The actual chart
@@ -1017,7 +1017,7 @@ Triggers on PRs touching `charts/tika/**`:
 
 ### 8.3 GitHub Actions — Release (`helm-release.yml`)
 
-Triggers on push to `main` touching `charts/tika/**`:
+Triggers on push to `master` touching `charts/tika/**`:
 
 1. Checkout with full history.
 2. Setup Helm.

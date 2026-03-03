@@ -77,8 +77,8 @@ helm install tika kenchrcum-tika/tika -f tika/examples/high-availability.yaml
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| [Lint and Test](https://github.com/kenchrcum/helm-chart-tika/actions/workflows/helm-lint-test.yml) | Every PR and push to `main` | `helm lint`, template rendering, schema validation |
-| [Release](https://github.com/kenchrcum/helm-chart-tika/actions/workflows/helm-release.yml) | Push to `main` | Package and publish to GitHub Pages via chart-releaser |
+| [Lint and Test](https://github.com/kenchrcum/helm-chart-tika/actions/workflows/helm-lint-test.yml) | Every PR and push to `master` | `helm lint`, template rendering, schema validation |
+| [Release](https://github.com/kenchrcum/helm-chart-tika/actions/workflows/helm-release.yml) | Push to `master` | Package and publish to GitHub Pages via chart-releaser |
 | [Setup Pages](https://github.com/kenchrcum/helm-chart-tika/actions/workflows/setup-pages.yml) | Manual dispatch | One-time initialisation of the `gh-pages` branch |
 
 Charts are published to:  
