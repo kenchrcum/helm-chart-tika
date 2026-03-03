@@ -1,0 +1,46 @@
+# CI values: custom Tika configuration
+# Tests ConfigMap creation, config volume mounting, -c flag injection,
+# JVM options command override, and CORS flag support.
+tika:
+  fullImage: true
+
+  javaOpts: "-Xmx1g -Xms256m -XX:+UseG1GC"
+
+  cors: "https://example.com"
+
+  logLevel: "debug"
+
+  config: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <properties>
+      <parsers>
+        <parser class="org.apache.tika.parser.DefaultParser">
+          <params>
+            <param name="extractInlineImages" type="bool">false</param>
+          </params>
+        </parser>
+      </parsers>
+      <parsers>
+        <parser class="org.apache.tika.parser.pdf.PDFParser">
+          <params>
+            <param name="ocrStrategy" type="string">auto</param>
+            <param name="ocrDPI" type="int">300</param>
+          </params>
+        </parser>
+      </parsers>
+      <autoDetectParserConfig>
+        <params>
+          <spoolToDisk>-1</spoolToDisk>
+          <outputThreshold>-1</outputThreshold>
+        </params>
+      </autoDetectParserConfig>
+    </properties>
+
+  additionalConfigs:
+    custom-mimetypes.xml: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <mime-info>
+        <mime-type type="application/x-custom">
+          <glob pattern="*.custom"/>
+        </mime-type>
+      </mime-info>

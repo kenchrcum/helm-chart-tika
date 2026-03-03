@@ -1,0 +1,32 @@
+# basic-deployment.yaml
+#
+# Minimal Apache Tika deployment using the default full image.
+# Good for getting started quickly with sensible production-ish defaults.
+#
+# Install:
+#   helm repo add kenchrcum https://kenchrcum.github.io/helm-charts
+#   helm install tika kenchrcum/tika -f basic-deployment.yaml
+#
+# Or from source:
+#   helm install tika ./tika -f tika/examples/basic-deployment.yaml
+
+# Use the full image (includes Tesseract OCR, GDAL, fonts)
+tika:
+  fullImage: true
+
+# 1 replica — scale up as needed
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+# ClusterIP service on port 9998 (default)
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9998

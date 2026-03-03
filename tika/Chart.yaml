@@ -1,0 +1,62 @@
+apiVersion: v2
+name: tika
+description: >-
+  A Helm chart for Apache Tika Server — a content analysis toolkit that detects
+  and extracts metadata and text from over a thousand different file types.
+type: application
+version: 0.1.0
+appVersion: "3.2.3.0"
+home: https://github.com/kenchrcum/helm-chart-tika
+sources:
+  - https://github.com/kenchrcum/helm-chart-tika
+  - https://github.com/apache/tika-docker
+  - https://github.com/apache/tika-helm
+keywords:
+  - tika
+  - apache-tika
+  - document-parsing
+  - text-extraction
+  - ocr
+  - pdf
+  - content-analysis
+maintainers:
+  - name: kenchrcum
+    url: https://github.com/kenchrcum
+icon: https://tika.apache.org/tika.png
+annotations:
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/links: |
+    - name: Apache Tika
+      url: https://tika.apache.org/
+    - name: Tika Docker
+      url: https://github.com/apache/tika-docker
+    - name: Chart Source
+      url: https://github.com/kenchrcum/helm-chart-tika
+  artifacthub.io/maintainers: |
+    - name: kenchrcum
+      url: https://github.com/kenchrcum
+  artifacthub.io/images: |
+    - name: tika
+      image: apache/tika:3.2.3.0-full
+      whitelisted: false
+    - name: tika-minimal
+      image: apache/tika:3.2.3.0
+      whitelisted: false
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release — production-ready Helm chart for Apache Tika Server
+    - kind: added
+      description: Startup probe with 120s tolerance for JVM warmup
+    - kind: added
+      description: PodDisruptionBudget support
+    - kind: added
+      description: ServiceMonitor and PodMonitor for Prometheus Operator
+    - kind: added
+      description: NetworkPolicy with namespace isolation and DNS egress
+    - kind: added
+      description: values.schema.json for input validation
+    - kind: added
+      description: Autoscaling behavior policies (scale-up/down)
+    - kind: security
+      description: "Secure defaults: allowPrivilegeEscalation=false, seccompProfile=RuntimeDefault, readOnlyRootFilesystem=true"

@@ -1,0 +1,13 @@
+# CI values: minimal image variant
+# Tests that tika.fullImage=false selects the minimal image tag (no -full suffix).
+# Intended for use cases where OCR/GDAL support is not required.
+tika:
+  fullImage: false
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi

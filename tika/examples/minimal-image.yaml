@@ -1,0 +1,34 @@
+# minimal-image.yaml
+#
+# Apache Tika deployment using the minimal image (no OCR, no GDAL, no extra fonts).
+# Use this when:
+#   - You only need to extract text from office documents, PDFs (text-based), HTML, etc.
+#   - Image size or memory is a concern (~400 MB vs ~1.5 GB for the full image).
+#   - You want faster pod startup.
+#
+# Install:
+#   helm repo add kenchrcum https://kenchrcum.github.io/helm-charts
+#   helm install tika kenchrcum/tika -f minimal-image.yaml
+#
+# Or from source:
+#   helm install tika ./tika -f tika/examples/minimal-image.yaml
+
+tika:
+  # Disable the full image variant — uses apache/tika:<appVersion> instead of apache/tika:<appVersion>-full
+  fullImage: false
+
+replicaCount: 1
+
+# Reduced resource footprint — no OCR means lower memory consumption
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9998

@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tika.fullname" . }}
+  labels:
+    {{- include "tika.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "tika.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "tika.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "tika.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: tika
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ include "tika.imageTag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 9998
+              protocol: TCP
+          {{- if .Values.tika.javaOpts }}
+          command:
+            - /bin/sh
+            - -c
+            - >-
+              exec java {{ .Values.tika.javaOpts }}
+              -cp "/tika-server-standard-${TIKA_VERSION}.jar:/tika-extras/*"
+              org.apache.tika.server.core.TikaServerCli -h 0.0.0.0
+              {{- if .Values.tika.config }} -c /tika-config/tika-config.xml{{- end }}
+              {{- if .Values.tika.cors }} --cors {{ .Values.tika.cors | quote }}{{- end }}
+          {{- else }}
+          args:
+            {{- if .Values.tika.config }}
+            - "-c"
+            - "/tika-config/tika-config.xml"
+            {{- end }}
+            {{- if .Values.tika.cors }}
+            - "--cors"
+            - {{ .Values.tika.cors | quote }}
+            {{- end }}
+          {{- end }}
+          env:
+            - name: TIKA_CHILD_PROCESS_TIMEOUT
+              value: "300000"
+            {{- if .Values.tika.logLevel }}
+            - name: TIKA_SERVER_LOG_LEVEL
+              value: {{ .Values.tika.logLevel | quote }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            {{- if .Values.tika.config }}
+            - name: tika-config
+              mountPath: /tika-config
+              readOnly: true
+            {{- end }}
+            {{- if .Values.tikaExtras.enabled }}
+            - name: tika-extras
+              mountPath: /tika-extras
+              {{- if eq .Values.tikaExtras.type "pvc" }}
+              readOnly: false
+              {{- else }}
+              readOnly: true
+              {{- end }}
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.sidecars }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.tika.config }}
+        - name: tika-config
+          configMap:
+            name: {{ include "tika.fullname" . }}-config
+        {{- end }}
+        {{- if .Values.tikaExtras.enabled }}
+        - name: tika-extras
+          {{- if eq .Values.tikaExtras.type "pvc" }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.tikaExtras.pvc.existingClaim | default (printf "%s-extras" (include "tika.fullname" .)) }}
+          {{- else }}
+          emptyDir:
+            sizeLimit: {{ .Values.tikaExtras.emptyDir.sizeLimit }}
+          {{- end }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

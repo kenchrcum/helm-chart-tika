@@ -1,0 +1,20 @@
+{{- if .Values.podMonitor.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "tika.fullname" . }}
+  labels:
+    {{- include "tika.labels" . | nindent 4 }}
+    {{- with .Values.podMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "tika.selectorLabels" . | nindent 6 }}
+  podMetricsEndpoints:
+    - port: http
+      path: {{ .Values.podMonitor.path | quote }}
+      interval: {{ .Values.podMonitor.interval }}
+      scrapeTimeout: {{ .Values.podMonitor.scrapeTimeout }}
+{{- end }}

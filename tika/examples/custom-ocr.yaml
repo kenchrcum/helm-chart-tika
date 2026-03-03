@@ -1,0 +1,62 @@
+# custom-ocr.yaml
+#
+# Apache Tika with a custom tika-config.xml that fine-tunes OCR behaviour.
+# Requires the full image (tika.fullImage: true, which is the default).
+#
+# This configuration:
+#   - Sets OCR strategy to "auto" (run OCR only when text extraction fails)
+#   - Uses 300 DPI for better OCR quality on scanned documents
+#   - Bumps JVM heap to 3 GB to handle large files
+#
+# Install:
+#   helm repo add kenchrcum https://kenchrcum.github.io/helm-charts
+#   helm install tika kenchrcum/tika -f custom-ocr.yaml
+#
+# Or from source:
+#   helm install tika ./tika -f tika/examples/custom-ocr.yaml
+
+tika:
+  # Full image is required for Tesseract OCR support
+  fullImage: true
+
+  # JVM heap: leave ~1 GB headroom below the memory limit
+  javaOpts: "-Xmx3g -Xms1g -XX:+UseG1GC"
+
+  # Custom tika-config.xml — tuned OCR settings for PDF parsing
+  config: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <properties>
+      <parsers>
+        <parser class="org.apache.tika.parser.pdf.PDFParser">
+          <params>
+            <!-- "auto" runs OCR only when no text layer is detected -->
+            <param name="ocrStrategy" type="string">auto</param>
+            <!-- Higher DPI improves OCR accuracy on low-resolution scans -->
+            <param name="ocrDPI" type="int">300</param>
+          </params>
+        </parser>
+      </parsers>
+
+      <!-- Prevent spooling very large files to disk during parsing -->
+      <autoDetectParserConfig>
+        <params>
+          <spoolToDisk>-1</spoolToDisk>
+          <outputThreshold>-1</outputThreshold>
+        </params>
+      </autoDetectParserConfig>
+    </properties>
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: "1"
+    memory: 2Gi
+  limits:
+    cpu: "4"
+    memory: 4Gi
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9998

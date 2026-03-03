@@ -1,0 +1,17 @@
+{{- if or .Values.tika.config .Values.tika.additionalConfigs }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tika.fullname" . }}-config
+  labels:
+    {{- include "tika.labels" . | nindent 4 }}
+data:
+  {{- if .Values.tika.config }}
+  tika-config.xml: |
+    {{- .Values.tika.config | nindent 4 }}
+  {{- end }}
+  {{- range $key, $value := .Values.tika.additionalConfigs }}
+  {{ $key }}: |
+    {{- $value | nindent 4 }}
+  {{- end }}
+{{- end }}

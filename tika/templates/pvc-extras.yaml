@@ -1,0 +1,17 @@
+{{- if and .Values.tikaExtras.enabled (eq .Values.tikaExtras.type "pvc") (not .Values.tikaExtras.pvc.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "tika.fullname" . }}-extras
+  labels:
+    {{- include "tika.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.tikaExtras.pvc.accessModes | nindent 4 }}
+  {{- if .Values.tikaExtras.pvc.storageClass }}
+  storageClassName: {{ .Values.tikaExtras.pvc.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.tikaExtras.pvc.size }}
+{{- end }}

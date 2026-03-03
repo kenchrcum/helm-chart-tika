@@ -1,0 +1,345 @@
+# -- Number of Tika pod replicas to deploy
+replicaCount: 1
+
+image:
+  # -- Docker image repository for Apache Tika
+  repository: apache/tika
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Image tag (defaults to appVersion from Chart.yaml with "-full" suffix)
+  tag: ""
+
+# -- Secrets for pulling images from a private registry
+imagePullSecrets: []
+# -- Override the name of the chart
+nameOverride: ""
+# -- Override the full name of the release
+fullnameOverride: ""
+
+# ---------------------------------------------------------
+# Tika Server Configuration
+# ---------------------------------------------------------
+tika:
+  # -- Use the full image variant (with OCR, GDAL, fonts).
+  # When true and image.tag is empty, appends "-full" to the appVersion.
+  # Set to false for the minimal image.
+  fullImage: true
+
+  # -- Custom Tika configuration XML (tika-config.xml).
+  # When set, creates a ConfigMap and passes -c flag to Tika.
+  # See: https://tika.apache.org/3.0.0/configuring.html
+  # Example:
+  #   config: |
+  #     <?xml version="1.0" encoding="UTF-8"?>
+  #     <properties>
+  #       <parsers>
+  #         <parser class="org.apache.tika.parser.DefaultParser">
+  #           <parser-exclude class="org.apache.tika.parser.ocr.TesseractOCRParser"/>
+  #         </parser>
+  #       </parsers>
+  #     </properties>
+  config: ""
+
+  # -- Additional configuration files to mount alongside tika-config.xml.
+  # Each key becomes a file in /tika-config/.
+  # Example:
+  #   additionalConfigs:
+  #     custom-mimetypes.xml: |
+  #       <?xml version="1.0" encoding="UTF-8"?>
+  #       <mime-info>
+  #         <mime-type type="application/pdf">
+  #           <glob pattern="*.pdf"/>
+  #         </mime-type>
+  #       </mime-info>
+  additionalConfigs: {}
+
+  # -- JVM options for the Tika Server process.
+  # Example: "-Xmx2g -Xms512m -XX:+UseG1GC"
+  javaOpts: ""
+
+  # -- CORS origins to allow (passed as --cors flag).
+  # Set to "*" for all origins, or a comma-separated list.
+  cors: ""
+
+  # -- Log level for Tika Server
+  logLevel: "info"
+
+# ---------------------------------------------------------
+# Service Account
+# ---------------------------------------------------------
+serviceAccount:
+  # -- Create a service account
+  create: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account (auto-generated if empty)
+  name: ""
+
+# ---------------------------------------------------------
+# Pod Configuration
+# ---------------------------------------------------------
+# -- Annotations to add to pods
+podAnnotations: {}
+# -- Labels to add to pods
+podLabels: {}
+
+podSecurityContext:
+  # -- Run pod as non-root
+  runAsNonRoot: true
+  # -- User ID (matches Tika Docker image UID)
+  runAsUser: 35002
+  # -- Group ID (matches Tika Docker image GID)
+  runAsGroup: 35002
+  # -- Filesystem group
+  fsGroup: 35002
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  # -- Read-only root filesystem (Tika needs writable /tmp via emptyDir)
+  readOnlyRootFilesystem: true
+  # -- Disallow privilege escalation
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
+
+# ---------------------------------------------------------
+# Service
+# ---------------------------------------------------------
+service:
+  # -- Create a Service resource
+  enabled: true
+  # -- Service type (ClusterIP, NodePort, LoadBalancer)
+  type: ClusterIP
+  # -- Service port
+  port: 9998
+  # -- Annotations for the service
+  annotations: {}
+
+# ---------------------------------------------------------
+# Ingress
+# ---------------------------------------------------------
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Annotations for the ingress
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: tika.local
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- TLS configuration
+  tls: []
+  #  - secretName: tika-tls
+  #    hosts:
+  #      - tika.local
+
+# ---------------------------------------------------------
+# Resources
+# ---------------------------------------------------------
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+# ---------------------------------------------------------
+# Probes
+# ---------------------------------------------------------
+startupProbe:
+  httpGet:
+    path: /version
+    port: http
+  # -- Tika JVM startup can be slow; allow up to 120s (24 * 5s)
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 24
+  timeoutSeconds: 5
+
+livenessProbe:
+  httpGet:
+    path: /version
+    port: http
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /version
+    port: http
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# ---------------------------------------------------------
+# Autoscaling
+# ---------------------------------------------------------
+autoscaling:
+  # -- Enable HorizontalPodAutoscaler
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  # -- Autoscaling behavior policies
+  behavior: {}
+  #   scaleDown:
+  #     stabilizationWindowSeconds: 300
+  #     policies:
+  #       - type: Percent
+  #         value: 50
+  #         periodSeconds: 60
+  #   scaleUp:
+  #     stabilizationWindowSeconds: 0
+  #     policies:
+  #       - type: Percent
+  #         value: 100
+  #         periodSeconds: 15
+
+# ---------------------------------------------------------
+# Pod Disruption Budget
+# ---------------------------------------------------------
+podDisruptionBudget:
+  # -- Enable PodDisruptionBudget
+  enabled: false
+  # -- Minimum available pods (number or percentage)
+  minAvailable: ~
+  # -- Maximum unavailable pods (number or percentage)
+  maxUnavailable: ~
+
+# ---------------------------------------------------------
+# Prometheus Monitoring
+# ---------------------------------------------------------
+# Note: Tika Server does not natively expose Prometheus metrics.
+# These resources are useful when a sidecar exporter (e.g., JMX exporter) is added.
+serviceMonitor:
+  # -- Enable ServiceMonitor (requires Prometheus Operator)
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  path: /metrics
+  # -- Extra labels for the ServiceMonitor
+  labels: {}
+
+podMonitor:
+  # -- Enable PodMonitor (requires Prometheus Operator)
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  path: /metrics
+  # -- Extra labels for the PodMonitor
+  labels: {}
+
+# ---------------------------------------------------------
+# Network Policy
+# ---------------------------------------------------------
+networkPolicy:
+  # -- Enable NetworkPolicy
+  enabled: false
+  policyTypes:
+    - Ingress
+    - Egress
+  # -- Restrict ingress to same namespace only
+  namespaceIsolation: true
+  namespaceLabel:
+    key: "kubernetes.io/metadata.name"
+  # -- Ingress rules
+  ingress:
+    # -- Allow ingress from ingress controllers
+    ingressControllers: false
+    ingressNamespace: "ingress-nginx"
+    # -- Allow ingress from monitoring services
+    monitoring: false
+    monitoringNamespace: "monitoring"
+
+# ---------------------------------------------------------
+# Extra JARs Volume (tika-extras)
+# ---------------------------------------------------------
+tikaExtras:
+  # -- Enable mounting extra JARs at /tika-extras/
+  enabled: false
+  # -- Volume type: "emptyDir", "pvc", or "hostPath"
+  type: emptyDir
+  emptyDir:
+    sizeLimit: 1Gi
+  pvc:
+    storageClass: ""
+    size: 2Gi
+    accessModes:
+      - ReadWriteOnce
+    # -- Use an existing PVC instead of creating one
+    existingClaim: ""
+
+# ---------------------------------------------------------
+# Extensibility
+# ---------------------------------------------------------
+# -- Extra environment variables for the Tika container
+extraEnv: []
+# Example:
+#   - name: JAVA_OPTS
+#     value: "-Xmx2g"
+#   - name: MY_VAR
+#     valueFrom:
+#       secretKeyRef:
+#         name: my-secret
+#         key: my-key
+
+# -- Extra volume mounts for the Tika container
+extraVolumeMounts: []
+# Example:
+#   - name: custom-jars
+#     mountPath: /tika-extras
+#     readOnly: true
+
+# -- Extra volumes for the pod
+extraVolumes: []
+# Example:
+#   - name: custom-jars
+#     configMap:
+#       name: tika-extra-jars
+
+# -- Init containers
+initContainers: []
+# Example:
+#   - name: download-models
+#     image: busybox:1.36
+#     command: ['sh', '-c', 'wget -O /tika-extras/model.jar https://example.com/model.jar']
+#     volumeMounts:
+#       - name: tika-extras
+#         mountPath: /tika-extras
+
+# -- Sidecar containers
+sidecars: []
+# Example:
+#   - name: jmx-exporter
+#     image: bitnami/jmx-exporter:latest
+#     ports:
+#       - containerPort: 5556
+
+# ---------------------------------------------------------
+# Scheduling
+# ---------------------------------------------------------
+# -- Node selector
+nodeSelector: {}
+# -- Tolerations
+tolerations: []
+# -- Affinity rules
+affinity: {}
+# -- Topology spread constraints
+topologySpreadConstraints: []
+# Example:
+#   - maxSkew: 1
+#     topologyKey: kubernetes.io/hostname
+#     whenUnsatisfiable: DoNotSchedule
+#     labelSelector:
+#       matchLabels:
+#         app.kubernetes.io/name: tika

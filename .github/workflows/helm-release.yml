@@ -1,0 +1,66 @@
+name: Release Helm Chart
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Run helm lint
+        run: helm lint tika/
+
+      - name: Template — default values
+        run: helm template test tika/ > /dev/null
+
+      - name: Template — ci-full-features
+        run: helm template test tika/ -f tika/tests/ci-full-features.yaml > /dev/null
+
+  release:
+    runs-on: ubuntu-latest
+    needs: lint
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          # The tika chart lives in tika/ within this repo root.
+          # chart-releaser discovers it via tika/Chart.yaml.
+          charts_dir: .
+          config: .github/cr.yaml
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

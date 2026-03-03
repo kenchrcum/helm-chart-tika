@@ -1,0 +1,664 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Apache Tika Helm Chart Values",
+  "description": "Schema for validating Apache Tika Helm chart values",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "replicaCount": {
+      "type": "integer",
+      "description": "Number of Tika pod replicas to deploy",
+      "minimum": 1,
+      "default": 1
+    },
+    "image": {
+      "type": "object",
+      "description": "Docker image configuration",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "description": "Docker image repository for Apache Tika",
+          "default": "apache/tika"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "description": "Image pull policy",
+          "enum": ["IfNotPresent", "Always", "Never"],
+          "default": "IfNotPresent"
+        },
+        "tag": {
+          "type": ["string", "null"],
+          "description": "Image tag (defaults to appVersion from Chart.yaml with optional '-full' suffix)",
+          "default": null
+        }
+      },
+      "additionalProperties": false
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "description": "Secrets for pulling images from a private registry",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the name of the chart",
+      "default": ""
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "Override the full name of the release",
+      "default": ""
+    },
+    "tika": {
+      "type": "object",
+      "description": "Tika Server configuration",
+      "properties": {
+        "fullImage": {
+          "type": "boolean",
+          "description": "Use the full image variant (with OCR, GDAL, fonts)",
+          "default": true
+        },
+        "config": {
+          "type": "string",
+          "description": "Custom Tika configuration XML (tika-config.xml)",
+          "default": ""
+        },
+        "additionalConfigs": {
+          "type": "object",
+          "description": "Additional configuration files to mount alongside tika-config.xml",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {}
+        },
+        "javaOpts": {
+          "type": "string",
+          "description": "JVM options for the Tika Server process",
+          "default": ""
+        },
+        "cors": {
+          "type": "string",
+          "description": "CORS origins to allow (passed as --cors flag)",
+          "default": ""
+        },
+        "logLevel": {
+          "type": "string",
+          "description": "Log level for Tika Server",
+          "enum": ["trace", "debug", "info", "warn", "error"],
+          "default": "info"
+        }
+      },
+      "additionalProperties": false
+    },
+    "serviceAccount": {
+      "type": "object",
+      "description": "Service account configuration",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "description": "Create a service account",
+          "default": true
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Annotations to add to the service account",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {}
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the service account (auto-generated if empty)",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "podAnnotations": {
+      "type": "object",
+      "description": "Annotations to add to pods",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
+    "podLabels": {
+      "type": "object",
+      "description": "Labels to add to pods",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "description": "Pod security context",
+      "properties": {
+        "runAsNonRoot": {
+          "type": "boolean",
+          "description": "Run pod as non-root",
+          "default": true
+        },
+        "runAsUser": {
+          "type": "integer",
+          "description": "User ID (matches Tika Docker image UID)",
+          "default": 35002
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "description": "Group ID (matches Tika Docker image GID)",
+          "default": 35002
+        },
+        "fsGroup": {
+          "type": "integer",
+          "description": "Filesystem group",
+          "default": 35002
+        }
+      },
+      "additionalProperties": false
+    },
+    "securityContext": {
+      "type": "object",
+      "description": "Container security context",
+      "additionalProperties": true
+    },
+    "service": {
+      "type": "object",
+      "description": "Kubernetes Service configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Create a Service resource",
+          "default": true
+        },
+        "type": {
+          "type": "string",
+          "description": "Service type (ClusterIP, NodePort, LoadBalancer)",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer", "ExternalName"],
+          "default": "ClusterIP"
+        },
+        "port": {
+          "type": "integer",
+          "description": "Service port",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 9998
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Annotations for the service",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {}
+        }
+      },
+      "additionalProperties": false
+    },
+    "ingress": {
+      "type": "object",
+      "description": "Kubernetes Ingress configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable ingress",
+          "default": false
+        },
+        "className": {
+          "type": "string",
+          "description": "Ingress class name",
+          "default": ""
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Annotations for the ingress",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {}
+        },
+        "hosts": {
+          "type": "array",
+          "description": "Ingress hosts and paths",
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "Hostname"
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "description": "URL path"
+                    },
+                    "pathType": {
+                      "type": "string",
+                      "description": "Path type (Exact, Prefix, ImplementationSpecific)",
+                      "enum": ["Exact", "Prefix", "ImplementationSpecific"],
+                      "default": "Prefix"
+                    }
+                  },
+                  "required": ["path"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["host", "paths"],
+            "additionalProperties": false
+          },
+          "default": [
+            {
+              "host": "tika.local",
+              "paths": [
+                {
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          ]
+        },
+        "tls": {
+          "type": "array",
+          "description": "TLS configuration",
+          "items": {
+            "type": "object"
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "object",
+      "description": "Container resource requests and limits",
+      "properties": {
+        "requests": {
+          "type": "object",
+          "description": "Resource requests",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "description": "CPU request"
+            },
+            "memory": {
+              "type": "string",
+              "description": "Memory request"
+            }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "description": "Resource limits",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "description": "CPU limit"
+            },
+            "memory": {
+              "type": "string",
+              "description": "Memory limit"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "startupProbe": {
+      "type": "object",
+      "description": "Startup probe configuration",
+      "additionalProperties": true
+    },
+    "livenessProbe": {
+      "type": "object",
+      "description": "Liveness probe configuration",
+      "additionalProperties": true
+    },
+    "readinessProbe": {
+      "type": "object",
+      "description": "Readiness probe configuration",
+      "additionalProperties": true
+    },
+    "autoscaling": {
+      "type": "object",
+      "description": "HorizontalPodAutoscaler configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable HorizontalPodAutoscaler",
+          "default": false
+        },
+        "minReplicas": {
+          "type": "integer",
+          "description": "Minimum number of replicas",
+          "minimum": 1,
+          "default": 1
+        },
+        "maxReplicas": {
+          "type": "integer",
+          "description": "Maximum number of replicas",
+          "minimum": 1,
+          "default": 10
+        },
+        "targetCPUUtilizationPercentage": {
+          "type": ["integer", "null"],
+          "description": "Target CPU utilization percentage",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 80
+        },
+        "targetMemoryUtilizationPercentage": {
+          "type": ["integer", "null"],
+          "description": "Target memory utilization percentage",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 80
+        },
+        "behavior": {
+          "type": "object",
+          "description": "Autoscaling behavior policies",
+          "additionalProperties": true,
+          "default": {}
+        }
+      },
+      "additionalProperties": false
+    },
+    "podDisruptionBudget": {
+      "type": "object",
+      "description": "PodDisruptionBudget configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable PodDisruptionBudget",
+          "default": false
+        },
+        "minAvailable": {
+          "type": ["string", "integer", "null"],
+          "description": "Minimum available pods (number or percentage)",
+          "default": null
+        },
+        "maxUnavailable": {
+          "type": ["string", "integer", "null"],
+          "description": "Maximum unavailable pods (number or percentage)",
+          "default": null
+        }
+      },
+      "additionalProperties": false
+    },
+    "serviceMonitor": {
+      "type": "object",
+      "description": "ServiceMonitor configuration for Prometheus",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable ServiceMonitor (requires Prometheus Operator)",
+          "default": false
+        },
+        "interval": {
+          "type": "string",
+          "description": "Scrape interval",
+          "default": "30s"
+        },
+        "scrapeTimeout": {
+          "type": "string",
+          "description": "Scrape timeout",
+          "default": "10s"
+        },
+        "path": {
+          "type": "string",
+          "description": "Metrics path",
+          "default": "/metrics"
+        },
+        "labels": {
+          "type": "object",
+          "description": "Extra labels for the ServiceMonitor",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {}
+        }
+      },
+      "additionalProperties": false
+    },
+    "podMonitor": {
+      "type": "object",
+      "description": "PodMonitor configuration for Prometheus",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable PodMonitor (requires Prometheus Operator)",
+          "default": false
+        },
+        "interval": {
+          "type": "string",
+          "description": "Scrape interval",
+          "default": "30s"
+        },
+        "scrapeTimeout": {
+          "type": "string",
+          "description": "Scrape timeout",
+          "default": "10s"
+        },
+        "path": {
+          "type": "string",
+          "description": "Metrics path",
+          "default": "/metrics"
+        },
+        "labels": {
+          "type": "object",
+          "description": "Extra labels for the PodMonitor",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {}
+        }
+      },
+      "additionalProperties": false
+    },
+    "networkPolicy": {
+      "type": "object",
+      "description": "NetworkPolicy configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable NetworkPolicy",
+          "default": false
+        },
+        "policyTypes": {
+          "type": "array",
+          "description": "Network policy types",
+          "items": {
+            "type": "string",
+            "enum": ["Ingress", "Egress"]
+          },
+          "default": ["Ingress", "Egress"]
+        },
+        "namespaceIsolation": {
+          "type": "boolean",
+          "description": "Restrict ingress to same namespace only",
+          "default": true
+        },
+        "namespaceLabel": {
+          "type": "object",
+          "description": "Namespace label for isolation",
+          "properties": {
+            "key": {
+              "type": "string",
+              "description": "Label key",
+              "default": "kubernetes.io/metadata.name"
+            }
+          },
+          "additionalProperties": false
+        },
+        "ingress": {
+          "type": "object",
+          "description": "Ingress rules",
+          "properties": {
+            "ingressControllers": {
+              "type": "boolean",
+              "description": "Allow ingress from ingress controllers",
+              "default": false
+            },
+            "ingressNamespace": {
+              "type": "string",
+              "description": "Ingress controller namespace",
+              "default": "ingress-nginx"
+            },
+            "monitoring": {
+              "type": "boolean",
+              "description": "Allow ingress from monitoring services",
+              "default": false
+            },
+            "monitoringNamespace": {
+              "type": "string",
+              "description": "Monitoring namespace",
+              "default": "monitoring"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "tikaExtras": {
+      "type": "object",
+      "description": "Extra JARs volume configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable mounting extra JARs at /tika-extras/",
+          "default": false
+        },
+        "type": {
+          "type": "string",
+          "description": "Volume type: 'emptyDir', 'pvc', or 'hostPath'",
+          "enum": ["emptyDir", "pvc", "hostPath"],
+          "default": "emptyDir"
+        },
+        "emptyDir": {
+          "type": "object",
+          "description": "EmptyDir volume configuration",
+          "properties": {
+            "sizeLimit": {
+              "type": "string",
+              "description": "Size limit for emptyDir",
+              "default": "1Gi"
+            }
+          },
+          "additionalProperties": false
+        },
+        "pvc": {
+          "type": "object",
+          "description": "PersistentVolumeClaim configuration",
+          "properties": {
+            "storageClass": {
+              "type": "string",
+              "description": "Storage class name",
+              "default": ""
+            },
+            "size": {
+              "type": "string",
+              "description": "PVC size",
+              "default": "2Gi"
+            },
+            "accessModes": {
+              "type": "array",
+              "description": "Access modes",
+              "items": {
+                "type": "string",
+                "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany"]
+              },
+              "default": ["ReadWriteOnce"]
+            },
+            "existingClaim": {
+              "type": "string",
+              "description": "Use an existing PVC instead of creating one",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "extraEnv": {
+      "type": "array",
+      "description": "Extra environment variables for the Tika container",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "extraVolumeMounts": {
+      "type": "array",
+      "description": "Extra volume mounts for the Tika container",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "extraVolumes": {
+      "type": "array",
+      "description": "Extra volumes for the pod",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "initContainers": {
+      "type": "array",
+      "description": "Init containers",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "sidecars": {
+      "type": "array",
+      "description": "Sidecar containers",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "nodeSelector": {
+      "type": "object",
+      "description": "Node selector",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
+    "tolerations": {
+      "type": "array",
+      "description": "Tolerations",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "affinity": {
+      "type": "object",
+      "description": "Affinity rules",
+      "additionalProperties": true,
+      "default": {}
+    },
+    "topologySpreadConstraints": {
+      "type": "array",
+      "description": "Topology spread constraints",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# CI values: default deployment
+# Tests the default chart configuration: full image, single replica,
+# no custom config, basic probes and security defaults.
+# This is intentionally minimal — all defaults should work out-of-the-box.
+replicaCount: 1

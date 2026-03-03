@@ -1,0 +1,105 @@
+# high-availability.yaml
+#
+# High-availability Apache Tika deployment suitable for production workloads:
+#   - Multiple replicas spread across nodes
+#   - HorizontalPodAutoscaler (CPU + memory based)
+#   - PodDisruptionBudget (at least 2 replicas always available)
+#   - Topology spread constraints (one pod per node)
+#   - Namespace-isolated NetworkPolicy
+#   - JVM tuning for sustained throughput
+#
+# Prerequisites:
+#   - Cluster with ≥3 nodes (for topology spread)
+#   - CNI that supports NetworkPolicy (Calico, Cilium, etc.)
+#   - metrics-server installed (for HPA to function)
+#
+# Install:
+#   helm repo add kenchrcum https://kenchrcum.github.io/helm-charts
+#   helm install tika kenchrcum/tika -f high-availability.yaml
+#
+# Or from source:
+#   helm install tika ./tika -f tika/examples/high-availability.yaml
+
+tika:
+  fullImage: true
+  # Tune heap: set Xmx ~1 GB below the memory limit to leave room for JVM overhead
+  javaOpts: "-Xmx3g -Xms1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+
+# Initial replica count — HPA will manage scale-out beyond this
+replicaCount: 3
+
+resources:
+  requests:
+    cpu: "1"
+    memory: 2Gi
+  limits:
+    cpu: "4"
+    memory: 4Gi
+
+# -----------------------------------------------------------------
+# Horizontal Pod Autoscaler
+# -----------------------------------------------------------------
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  behavior:
+    scaleDown:
+      # Wait 5 minutes before scaling down to avoid flapping
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+
+# -----------------------------------------------------------------
+# Pod Disruption Budget
+# -----------------------------------------------------------------
+podDisruptionBudget:
+  enabled: true
+  # Always keep at least 2 pods running during voluntary disruptions
+  minAvailable: 2
+
+# -----------------------------------------------------------------
+# Topology Spread Constraints — spread pods across nodes
+# -----------------------------------------------------------------
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: tika
+
+# -----------------------------------------------------------------
+# Network Policy — restrict traffic to same namespace + DNS egress
+# -----------------------------------------------------------------
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  # Only pods in the same namespace can reach Tika
+  namespaceIsolation: true
+  namespaceLabel:
+    key: "kubernetes.io/metadata.name"
+  ingress:
+    # Set to true if Tika must be reachable from an ingress controller
+    ingressControllers: false
+    ingressNamespace: "ingress-nginx"
+    # Set to true if Prometheus should scrape a JMX exporter sidecar
+    monitoring: false
+    monitoringNamespace: "monitoring"
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9998

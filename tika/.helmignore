@@ -1,0 +1,50 @@
+# Patterns to ignore when building packages.
+# This suppresses the build warnings for Chart dependencies
+# To change this behavior, delete this file and uncomment the next line.
+# - **/.gitignore
+# - **/.gitattributes
+# - **/Chart.lock
+# - **/Chart.yaml.orig
+# - **/go.mod
+# - **/go.sum
+# - **/go.work
+# - **/go.work.sum
+# - **/VERSION
+# - **/versionfile
+# - .github/
+# - .gitignore
+# - .gitattributes
+# - .helmignore
+# - OWNERS
+# - changelog.yaml
+# - changelog.md
+# - CHANGELOG.md
+# - CHANGELOG.rst
+# - README.md
+# - VALUES.md
+# - LICENSE
+# - LICENCE
+# - AUTHORS
+# - CONTRIBUTING.md
+# - INSTALL.md
+# - testing/
+# - docs/
+# - examples/
+# - *.orig
+# - *.swp
+# - *.swo
+# - *~
+# - .DS_Store
+# - thumbs.db
+# - .idea/
+# - .vscode/
+# - *.sublime-project
+# - *.sublime-workspace
+
+# Patterns specific to this chart
+.git/
+.gitignore
+.gitattributes
+*.md
+LICENSE
+LICENCE

@@ -1,0 +1,78 @@
+1. Get the Tika Server URL:
+  {{- if .Values.ingress.enabled }}
+
+  Ingress is enabled. Tika Server should be accessible at:
+  {{- range $host := .Values.ingress.hosts }}
+    {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+    {{- end }}
+  {{- end }}
+
+  {{- else if eq .Values.service.type "NodePort" }}
+
+  Service is exposed as NodePort. Get the node IP and port:
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "tika.fullname" . }})
+  Tika Server URL: http://$NODE_IP:$NODE_PORT
+
+  {{- else if eq .Values.service.type "LoadBalancer" }}
+
+  Service is exposed as LoadBalancer. Wait for external IP assignment:
+  kubectl get svc {{ include "tika.fullname" . }} --namespace {{ .Release.Namespace }} -w
+
+  {{- else }}
+
+  Service is ClusterIP (default). Use port-forward to access:
+  kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "tika.fullname" . }} 9998:{{ .Values.service.port }}
+  Tika Server URL: http://localhost:9998
+
+  {{- end }}
+
+2. Test the Tika Server connection:
+
+  curl http://localhost:9998/version
+
+  This should return the Tika version information.
+
+3. Check pod status:
+
+  kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "tika.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+  You can also view logs with:
+  kubectl logs --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "tika.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+{{- if .Values.resources.limits }}
+
+4. Resource Configuration:
+
+  This deployment is configured with the following resources:
+  {{- if .Values.resources.requests }}
+  Requests: CPU={{ .Values.resources.requests.cpu }}, Memory={{ .Values.resources.requests.memory }}
+  {{- end }}
+  {{- if .Values.resources.limits }}
+  Limits: CPU={{ .Values.resources.limits.cpu }}, Memory={{ .Values.resources.limits.memory }}
+  {{- end }}
+
+  For production use, review and adjust these values based on your workload.
+
+{{- end }}
+
+{{- if le .Values.replicaCount 1.0 }}
+
+5. High Availability Note:
+
+  You are currently running with replicaCount={{ .Values.replicaCount }}.
+  For production deployments, consider:
+  - Increasing replicaCount for redundancy
+  - Enabling autoscaling.enabled=true for dynamic scaling
+  - Configuring podDisruptionBudget for cluster maintenance
+
+{{- end }}
+
+6. Documentation:
+
+  For detailed information about Tika Server configuration, visit:
+  https://tika.apache.org/
+
+  For more information about this Helm chart:
+  https://github.com/kenchrcum/helm-charts
