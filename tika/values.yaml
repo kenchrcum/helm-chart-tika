@@ -2,11 +2,14 @@
 replicaCount: 1
 
 image:
-  # -- Docker image repository for Apache Tika
-  repository: apache/tika
+  # -- Docker image repository for Apache Tika.
+  # Defaults to the maintained, Alpine-based ghcr.io/kenchrcum/tika image.
+  # To use the official Apache image (unmaintained), set: apache/tika
+  repository: ghcr.io/kenchrcum/tika
   # -- Image pull policy
   pullPolicy: IfNotPresent
-  # -- Image tag (defaults to appVersion from Chart.yaml with "-full" suffix)
+  # -- Image tag (defaults to appVersion from Chart.yaml with "-full" suffix).
+  # Leave empty to use the tag derived from appVersion + tika.fullImage.
   tag: ""
 
 # -- Secrets for pulling images from a private registry

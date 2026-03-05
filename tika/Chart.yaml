@@ -4,13 +4,12 @@ description: >-
   A Helm chart for Apache Tika Server — a content analysis toolkit that detects
   and extracts metadata and text from over a thousand different file types.
 type: application
-version: 0.1.0
-appVersion: "3.2.3.0"
+version: 0.2.0
+appVersion: "3.2.3"
 home: https://github.com/kenchrcum/helm-chart-tika
 sources:
   - https://github.com/kenchrcum/helm-chart-tika
-  - https://github.com/apache/tika-docker
-  - https://github.com/apache/tika-helm
+  - https://github.com/kenchrcum/docker-image-tika
 keywords:
   - tika
   - apache-tika
@@ -29,8 +28,8 @@ annotations:
   artifacthub.io/links: |
     - name: Apache Tika
       url: https://tika.apache.org/
-    - name: Tika Docker
-      url: https://github.com/apache/tika-docker
+    - name: Docker Image
+      url: https://github.com/kenchrcum/docker-image-tika
     - name: Chart Source
       url: https://github.com/kenchrcum/helm-chart-tika
   artifacthub.io/maintainers: |
@@ -38,12 +37,16 @@ annotations:
       url: https://github.com/kenchrcum
   artifacthub.io/images: |
     - name: tika
-      image: apache/tika:3.2.3.0-full
+      image: ghcr.io/kenchrcum/tika:3.2.3-full
       whitelisted: false
     - name: tika-minimal
-      image: apache/tika:3.2.3.0
+      image: ghcr.io/kenchrcum/tika:3.2.3
       whitelisted: false
   artifacthub.io/changes: |
+    - kind: changed
+      description: "Switch default image to ghcr.io/kenchrcum/tika (maintained, Alpine-based, multi-arch)"
+    - kind: changed
+      description: "appVersion updated to 3.2.3 (aligned with new image tag scheme)"
     - kind: added
       description: Initial release — production-ready Helm chart for Apache Tika Server
     - kind: added

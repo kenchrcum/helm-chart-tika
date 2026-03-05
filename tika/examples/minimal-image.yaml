@@ -14,7 +14,7 @@
 #   helm install tika ./tika -f tika/examples/minimal-image.yaml
 
 tika:
-  # Disable the full image variant — uses apache/tika:<appVersion> instead of apache/tika:<appVersion>-full
+  # Disable the full image variant — uses ghcr.io/kenchrcum/tika:<appVersion> instead of ghcr.io/kenchrcum/tika:<appVersion>-full
   fullImage: false
 
 replicaCount: 1

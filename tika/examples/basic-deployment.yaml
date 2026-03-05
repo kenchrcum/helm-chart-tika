@@ -1,6 +1,6 @@
 # basic-deployment.yaml
 #
-# Minimal Apache Tika deployment using the default full image.
+# Minimal Apache Tika deployment using the default full image (ghcr.io/kenchrcum/tika).
 # Good for getting started quickly with sensible production-ish defaults.
 #
 # Install:
