@@ -67,7 +67,7 @@ Then verify the deployment:
 kubectl get pods -l app.kubernetes.io/name=tika
 kubectl port-forward svc/tika 9998:9998
 curl http://localhost:9998/version
-# → Apache Tika 3.4.0
+# → Apache Tika 3.3.0
 ```
 
 ---
@@ -108,8 +108,8 @@ Apache Tika ships two image variants:
 
 | Variant | Tag Pattern | Size | Includes |
 |---------|-------------|------|----------|
-| Full (default) | `3.4.0-full` | ~1.5 GB | Tesseract OCR, GDAL, ImageMagick, fonts |
-| Minimal | `3.4.0` | ~400 MB | Tika core only |
+| Full (default) | `3.3.0-full` | ~1.5 GB | Tesseract OCR, GDAL, ImageMagick, fonts |
+| Minimal | `3.3.0` | ~400 MB | Tika core only |
 
 Control this with `tika.fullImage` (default: `true`). To use the minimal image:
 

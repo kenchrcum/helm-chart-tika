@@ -29,7 +29,7 @@ Verify:
 ```bash
 kubectl port-forward svc/tika 9998:9998
 curl http://localhost:9998/version
-# → Apache Tika 3.4.0
+# → Apache Tika 3.3.0
 ```
 
 ---
