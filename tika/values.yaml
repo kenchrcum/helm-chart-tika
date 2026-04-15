@@ -1,4 +1,4 @@
-<# -- Number of Tika pod replicas to deploy
+# -- Number of Tika pod replicas to deploy
 replicaCount: 1
 
 image:
