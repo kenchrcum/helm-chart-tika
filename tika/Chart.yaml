@@ -5,7 +5,7 @@ description: >-
   and extracts metadata and text from over a thousand different file types.
 type: application
 version: 0.2.0
-appVersion: "3.2.3"
+appVersion: "3.3.0"
 home: https://github.com/kenchrcum/helm-chart-tika
 sources:
   - https://github.com/kenchrcum/helm-chart-tika
@@ -37,16 +37,16 @@ annotations:
       url: https://github.com/kenchrcum
   artifacthub.io/images: |
     - name: tika
-      image: ghcr.io/kenchrcum/tika:3.2.3-full
+      image: ghcr.io/kenchrcum/tika:3.3.0-full
       whitelisted: false
     - name: tika-minimal
-      image: ghcr.io/kenchrcum/tika:3.2.3
+      image: ghcr.io/kenchrcum/tika:3.3.0
       whitelisted: false
   artifacthub.io/changes: |
     - kind: changed
       description: "Switch default image to ghcr.io/kenchrcum/tika (maintained, Alpine-based, multi-arch)"
     - kind: changed
-      description: "appVersion updated to 3.2.3 (aligned with new image tag scheme)"
+      description: "appVersion updated to 3.3.0 (aligned with new image tag scheme)"
     - kind: added
       description: Initial release — production-ready Helm chart for Apache Tika Server
     - kind: added

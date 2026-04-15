@@ -149,7 +149,7 @@ Apache Tika publishes two image variants on DockerHub as `apache/tika`:
 - No OCR (Tesseract), no GDAL, no extra fonts.
 - **Smaller image size** (~400MB).
 - Suitable for text extraction from office documents, PDFs (text-based), HTML, etc.
-- Tag examples: `3.2.3.0`, `latest`
+- Tag examples: `3.4.0`, `latest`
 
 ### 3.2 Full Image (`<version>-full` / `latest-full`)
 
@@ -160,11 +160,11 @@ Apache Tika publishes two image variants on DockerHub as `apache/tika`:
   - **Microsoft core fonts** and other font packages.
 - **Larger image size** (~1.5GB).
 - Required for OCR on scanned documents and images.
-- Tag examples: `3.2.3.0-full`, `latest-full`
+- Tag examples: `3.4.0-full`, `latest-full`
 
 ### Recommended Default Image
 
-The **full image** (`3.2.3.0-full`) is recommended as the default because:
+The **full image** (`3.4.0-full`) is recommended as the default because:
 - The full variant includes OCR (Tesseract), GDAL, and fonts for comprehensive document processing.
 - OCR capability enables extraction from scanned documents and images.
 - The additional ~1GB of image size is acceptable for the expanded functionality.
@@ -174,10 +174,10 @@ The **full image** (`3.2.3.0-full`) is recommended as the default because:
 
 | Tag | Tika Version | Base OS | Java |
 |-----|-------------|---------|------|
-| `3.2.3.0` | 3.2.3.0 | Ubuntu Plucky | OpenJDK 21 |
-| `3.2.3.0-full` | 3.2.3.0 | Ubuntu Plucky | OpenJDK 21 |
-| `latest` | 3.2.3.0 | Ubuntu Plucky | OpenJDK 21 |
-| `latest-full` | 3.2.3.0 | Ubuntu Plucky | OpenJDK 21 |
+| `3.4.0` | 3.4.0 | Ubuntu Plucky | OpenJDK 21 |
+| `3.4.0-full` | 3.4.0 | Ubuntu Plucky | OpenJDK 21 |
+| `latest` | 3.4.0 | Ubuntu Plucky | OpenJDK 21 |
+| `latest-full` | 3.4.0 | Ubuntu Plucky | OpenJDK 21 |
 
 ---
 
@@ -451,7 +451,7 @@ description: >-
   and extracts metadata and text from over a thousand different file types.
 type: application
 version: 0.1.0
-appVersion: "3.2.3.0"
+appVersion: "3.4.0"
 home: https://github.com/kenchrcum/helm-charts
 sources:
   - https://github.com/kenchrcum/helm-charts
@@ -1238,7 +1238,7 @@ echo "✓ Chart passes linting"
 
 | # | Question | Decision | Rationale |
 |---|----------|----------|-----------|
-| 1 | Default image: full or minimal? | **Full** (`3.2.3.0-full`) | The full image includes Tesseract OCR and language packs for comprehensive document extraction. Users can override to minimal variant if needed. |
+| 1 | Default image: full or minimal? | **Full** (`3.4.0-full`) | The full image includes Tesseract OCR and language packs for comprehensive document extraction. Users can override to minimal variant if needed. |
 | 2 | `readOnlyRootFilesystem`? | **`true`** with `/tmp` emptyDir | Tika only needs writable `/tmp` for processing. The upstream chart already does this (albeit clumsily). Clean emptyDir mount is more secure. |
 | 3 | `allowPrivilegeEscalation`? | **`false`** | The upstream chart defaults to `true` which is unnecessarily permissive. Tika runs as UID 35002 and has no need for privilege escalation. |
 | 4 | Health check endpoint? | **`GET /version`** | Returns a simple text response (`Apache Tika 3.x.x.x`). More reliable than `GET /` which returns HTML. Lightweight and fast. |
